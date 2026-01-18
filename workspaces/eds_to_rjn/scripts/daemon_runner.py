@@ -7,7 +7,7 @@ import csv
 from datetime import datetime
 
 from pipeline_eds.api.eds.rest.client import EdsRestClient, identify_relevant_tables
-from pipeline_eds.api.rjn import RjnClient
+from pipeline_eds.api.rjn import ClientRjn
 from pipeline_eds import helpers
 from pipeline_eds.env import SecretConfig
 from pipeline_eds.workspace_manager import WorkspaceManager
@@ -78,7 +78,7 @@ def run_hourly_tabular_trend_eds_to_rjn(test = False):
     sessions_eds.update({"WWTF":session_stiles})
 
     base_url_rjn = secrets_dict.get("contractor_apis", {}).get("RJN", {}).get("url").rstrip("/")
-    session_rjn = RjnClient.login_to_session(api_url = base_url_rjn,
+    session_rjn = ClientRjn.login_to_session(api_url = base_url_rjn,
                                     client_id = secrets_dict.get("contractor_apis", {}).get("RJN", {}).get("client_id"),
                                     password = secrets_dict.get("contractor_apis", {}).get("RJN", {}).get("password"))
     if session_rjn is None:
@@ -161,7 +161,7 @@ def run_hourly_tabular_trend_eds_to_rjn(test = False):
             
                 # Send data to RJN
                 if not test:
-                    rjn_data_transmission_succeeded = RjnClient.send_data_to_rjn(
+                    rjn_data_transmission_succeeded = ClientRjn.send_data_to_rjn(
                         session_rjn,
                         base_url = session_rjn.base_url,
                         entity_id = entity_id,
@@ -175,7 +175,7 @@ def run_hourly_tabular_trend_eds_to_rjn(test = False):
                         logger.info(f"RJN data transmission succeeded for entity_id {entity_id}, project_id {project_id}.")
                         save_tabular_trend_data_to_log_file(project_id, entity_id, endtime, workspace_manager,timestamps, values)
                 else:
-                    print("[TEST] RjnClient.send_data_to_rjn() skipped")
+                    print("[TEST] ClientRjn.send_data_to_rjn() skipped")
             
                 
 

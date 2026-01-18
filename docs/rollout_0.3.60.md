@@ -7,7 +7,7 @@ I don't need to build this solution if it has already been solved.
 
  Just a bit of light reading. 
 
- Working on the RjnClient. Check out recent updates at the Pipeline project at:  
+ Working on the ClientRjn. Check out recent updates at the Pipeline project at:  
 
  Find binaries at
  github.com/City-of-Memphis-Wastewater/pipeline/releases

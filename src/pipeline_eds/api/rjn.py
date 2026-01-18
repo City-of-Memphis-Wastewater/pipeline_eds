@@ -10,13 +10,13 @@ from pipeline_eds.time_manager import TimeManager
 
 logger = logging.getLogger(__name__)
 
-class RjnClient:
+class ClientRjn:
     def __init__(self,config):
         self.config = config
     
     @staticmethod
     def login_to_session(api_url, client_id, password):
-        logger.info("RjnClient.login_to_session()")
+        logger.info("ClientRjn.login_to_session()")
         session = requests.Session()
 
         data = {'client_id': client_id, 'password': password, 'type': 'script'}
@@ -86,7 +86,7 @@ class RjnClient:
                 print(f"Sent timestamps and values to entity {entity_id} (HTTP {response.status_code})")
                 return True
         except requests.exceptions.ConnectionError as e:
-            print("Skipping RjnClient.send_data_to_rjn() due to connection error")
+            print("Skipping ClientRjn.send_data_to_rjn() due to connection error")
             print(e)
             return False
         except requests.exceptions.RequestException as e:
@@ -127,7 +127,7 @@ def demo_rjn_ping():
     secrets_dict = SecretConfig.load_config(secrets_file_path = workspace_manager.get_secrets_file_path())
     
     base_url = secrets_dict.get("contractor_apis", {}).get("RJN", {}).get("url").rstrip("/")
-    session = RjnClient.login_to_session(api_url = base_url,
+    session = ClientRjn.login_to_session(api_url = base_url,
                                     client_id = secrets_dict.get("contractor_apis", {}).get("RJN", {}).get("client_id"),
                                     password = secrets_dict.get("contractor_apis", {}).get("RJN", {}).get("password"))
     if session is None:

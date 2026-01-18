@@ -5,7 +5,7 @@ from collections import defaultdict
 import os
 from pprint import pprint
 
-from pipeline_eds.api.rjn import RjnClient #send_data_to_rjn2
+from pipeline_eds.api.rjn import ClientRjn #send_data_to_rjn2
 from pipeline_eds.time_manager import TimeManager
 
 
@@ -66,7 +66,7 @@ def aggregate_and_send(session_rjn, data_file, checkpoint_file):
                 values=values
             )
             '''
-            RjnClient.send_data_to_rjn(
+            ClientRjn.send_data_to_rjn(
             session_rjn,
             base_url = session_rjn.base_url,
             project_id=row["rjn_projectid"],

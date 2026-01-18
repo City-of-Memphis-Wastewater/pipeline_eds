@@ -10,7 +10,7 @@ from pipeline_eds.security_and_config import SecurityAndConfig, get_base_url_con
 from pipeline_eds.variable_clarity import Redundancy
 from pipeline_eds.api.eds.config import get_configurable_default_plant_name, get_configurable_idcs_list
 
-class EdsSoapClient:
+class ClientEdsSoap:
     def __init__(self):
         pass
 
