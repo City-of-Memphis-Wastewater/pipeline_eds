@@ -38,9 +38,9 @@ class ClientEdsSoap:
         # Return False to propagate exceptions, or True to suppress them
         return False
 
-    @classmethod
+    @Redundancy.set_on_return_hint(recipient=None,attribute_name="tabular_data")
     def soap_api_iess_request_tabular(
-        cls,
+        self,
         plant_name: str | None = None,
         idcs: list[str] | None = None,
         *,
@@ -94,6 +94,7 @@ class ClientEdsSoap:
 
         username = SecurityAndConfig.get_credential_with_prompt(service_name, "username", f"Username for {plant_name}")
         password = SecurityAndConfig.get_credential_with_prompt(service_name, "password", f"Password for {plant_name}")
+        
         iess_suffix = SecurityAndConfig.get_config_with_prompt(
             f"{plant_name}_eds_api_iess_suffix", f"IESS suffix for {plant_name} (e.g. .UNIT0@NET0)"
         )
