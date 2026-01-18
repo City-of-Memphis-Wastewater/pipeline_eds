@@ -1,1 +1,1 @@
-from pipeline_eds.api.eds import soap
+from . import client, config

@@ -1,1 +1,1 @@
-from pipeline_eds.api import eds
+from . import soap, rest, core
