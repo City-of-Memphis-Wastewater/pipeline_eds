@@ -43,6 +43,12 @@ class ForcePrompt(Enum):
     CONSOLE = "console"
     NONE = "none"
 
+class AvoidPrompt(Enum):
+    WEB = "web"
+    GUI = "gui"
+    CONSOLE = "console"
+    NONE = "none"
+    
 class SecurityAndConfig:
     def __dict__(self):
         pass
@@ -53,9 +59,13 @@ class SecurityAndConfig:
     def prompt_for_value(prompt_message: str=None,
                           hide_input: bool=False,
                           force: ForcePrompt = ForcePrompt.NONE,
+                          avoid: AvoidPrompt = AvoidPrompt.NONE,
                           manager: PromptManager | None = None # <-- MANAGER IS ONLY FOR WEB GUI
                           ) -> str:
-        """Handles prompting with a fallback from CLI to GUI.
+        """
+        If force and avoid values are the same, avoid will win.
+
+        Handles prompting with a fallback from CLI to GUI.
         ### **Platform Quirk: Input Cancellation ({Ctrl}+C)**
         Due to the underlying POSIX terminal handling on Linux and Termux,
         using {Ctrl}+C to cancel an input prompt will require the user
@@ -70,10 +80,15 @@ class SecurityAndConfig:
         """
 
         value = None # ensure safe defeault so that the except block handles properly, namely if the user cancels the typer.prompt() input with control+ c
-        
-        if force == ForcePrompt.CONSOLE or (
+
+        # If force and avoid values are the same, avoid will win.
+        if force.value == avoid.value:
+            force = ForcePrompt.NONE
+            
+        if not avoid == AvoidPrompt.CONSOLE and (
+            force == ForcePrompt.CONSOLE or (
             ph.interactive_terminal_is_available() and force == ForcePrompt.NONE
-            ):
+        )):
             try:
                 # 1. CLI Mode (Interactive)
                 typer.echo(f"\n --- Use CLI input --- ")
@@ -95,9 +110,10 @@ class SecurityAndConfig:
             return value
     
         # 2. GUI Branch
-        if force == ForcePrompt.GUI or (
+        if not avoid == AvoidPrompt.GUI and (
+            force == ForcePrompt.GUI or (
             ph.tkinter_is_available() and force == ForcePrompt.NONE
-        ):
+        )):
             try:
                 # 2. GUI Mode (Non-interactive fallback)
                 from pipeline_eds.guiconfig import gui_get_input
@@ -113,9 +129,10 @@ class SecurityAndConfig:
                     prompt_message, hide_input, force=ForcePrompt.WEB, manager=manager
                 )
         # 3. Web Branch
-        if force == ForcePrompt.WEB or (
+        if ot avoid == AvoidPrompt.WEB and (
+            force == ForcePrompt.WEB or (
             ph.web_browser_is_available() and force == ForcePrompt.NONE
-        ):
+        )):
             # 3. Browser Mode (Web Browser as a fallback)
             from pipeline_eds.config_via_web import browser_get_input
 
