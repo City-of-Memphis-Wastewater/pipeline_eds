@@ -51,8 +51,9 @@ class SecurityAndConfig:
                           avoid: set[PromptMode] | None = None,
                           manager: PromptManager | None = None # <-- MANAGER IS ONLY FOR WEB GUI
                           ) -> str:
-        """
-        If force and avoid values are the same, avoid will win.
+        """    
+        Avoided prompt modes are always excluded.
+        If no modes are forced, the first available prompt mechanism is used.
 
         Handles prompting with a fallback from CLI to GUI.
         ### **Platform Quirk: Input Cancellation ({Ctrl}+C)**
@@ -103,8 +104,9 @@ class SecurityAndConfig:
                             return typer.prompt(msg, hide_input=True)
                     value = secure_prompt(prompt_message)
                 else:
-                    value = typer.prompt(prompt_message, hide_input=False)
-
+                     value = typer.prompt(prompt_message, hide_input=False)
+            except PromptCancelled:
+                raise
             except KeyboardInterrupt:
                 typer.echo("\nInput cancelled by user.")
                 raise
@@ -127,6 +129,8 @@ class SecurityAndConfig:
                 
                 if value is not None:
                     return value
+            except PromptCancelled:
+                raise
             except KeyboardInterrupt:
                 raise
             except Exception:
