@@ -407,7 +407,7 @@ class SecurityAndConfig:
                 # Store the new credential to dworshak
                 try:
                     #keyring.set_password(service_name, item_name, new_credential)
-                    dworshak_access.store_secret(service=service_name, item=item_name, password=new_credential)
+                    dworshak_access.store_secret(service=service_name, item=item_name, secret=new_credential)
                 except Exception as e:
                     typer.echo(f"⚠️  Failed to store credential: {e}")
                     return None
