@@ -3,13 +3,15 @@ from __future__ import annotations # Delays annotation evaluation, allowing mode
 import json
 from pathlib import Path
 import re
-from typing import Dict, Set, List, Any
+from typing import Dict, Set
 import typer
 import click.exceptions
 import logging
 import sys
 import pyhabitat as ph
 from pipeline_eds.state_manager import PromptManager # Import the manager class for type hinting
+from enum import Enum, auto
+
 
 try:
     import keyring
@@ -34,6 +36,13 @@ class CredentialsNotFoundError(Exception):
         self.message = message
         super().__init__(self.message)
 
+
+class ForcePrompt(Enum):
+    web = "web"
+    gui = "gui"
+    console = "console"
+    none = "none"
+
 class SecurityAndConfig:
     def __dict__(self):
         pass
@@ -43,9 +52,7 @@ class SecurityAndConfig:
     @staticmethod
     def prompt_for_value(prompt_message: str=None,
                           hide_input: bool=False,
-                          force_webbrowser:bool=False,
-                          force_terminal:bool=False,
-                          force_tkinter: bool=False,
+                          force: ForcePrompt = ForcePrompt.none,
                           manager: PromptManager | None = None # <-- MANAGER IS ONLY FOR WEB GUI
                           ) -> str:
         """Handles prompting with a fallback from CLI to GUI.
@@ -61,24 +68,12 @@ class SecurityAndConfig:
         in "cooked mode.".
         On  Windows, however, just {Ctrl}+C is expected to successfully perform a keyboard interrupt..
         """
-        # --- Assess forced avenue ---
-        whichever_is_true = next((
-            name for name, flag in [
-                ("webbrowser", force_terminal and force_webbrowser or force_tkinter and force_webbrowser), # favor webbrowser in these multi-force scenarios
-                ("terminal", force_tkinter and force_terminal), # favor terminal in this multi-force scenario
-                ("webbrowser", force_webbrowser),
-                ("terminal", force_terminal),
-                ("tkinter", force_tkinter)
-            ] if flag
-        ), None)
-
-        if whichever_is_true:
-            print(f"Force: {whichever_is_true}")
-        # --- End: Assess forced avenue ---
 
         value = None # ensure safe defeault so that the except block handles properly, namely if the user cancels the typer.prompt() input with control+ c
         
-        if ph.interactive_terminal_is_available() or force_terminal:
+        if force == ForcePrompt.console or (
+            ph.interactive_terminal_is_available() and force == ForcePrompt.none
+            ):
             try:
                 # 1. CLI Mode (Interactive)
                 typer.echo(f"\n --- Use CLI input --- ")
@@ -99,7 +94,10 @@ class SecurityAndConfig:
                 return None
             return value
     
-        elif ph.tkinter_is_available() or force_tkinter:
+        # 2. GUI Branch
+        if force == ForcePrompt.gui or (
+            ph.tkinter_is_available() and force == ForcePrompt.none
+        ):
             try:
                 # 2. GUI Mode (Non-interactive fallback)
                 from pipeline_eds.guiconfig import gui_get_input
@@ -109,9 +107,15 @@ class SecurityAndConfig:
                 if value is not None:
                     return value
             except:
-                SecurityAndConfig.prompt_for_value(prompt_message=prompt_message, force_webbrowser=True, manager=manager)
-
-        elif ph.web_browser_is_available() or force_webbrowser: # 3. Check for browser availability
+                # Fail-forward to Web if WSLg/X11 snaps
+                print("Failing forwards to web prompt when gui prompt failed.")
+                return SecurityAndConfig.prompt_for_value(
+                    prompt_message, hide_input, force=ForcePrompt.web, manager=manager
+                )
+        # 3. Web Branch
+        if force == ForcePrompt.web or (
+            ph.web_browser_is_available() and force == ForcePrompt.none
+        ):
             # 3. Browser Mode (Web Browser as a fallback)
             from pipeline_eds.config_via_web import browser_get_input
 
@@ -142,9 +146,7 @@ class SecurityAndConfig:
 
             if value is not None:
                 return value
-            
-        
-        
+
         # If all other options fail
         raise CredentialsNotFoundError(
             f"Configuration for '{prompt_message}' is missing or cancelled. "
