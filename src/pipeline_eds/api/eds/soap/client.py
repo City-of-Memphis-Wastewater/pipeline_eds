@@ -5,10 +5,16 @@ import logging
 import time
 from suds.client import Client as SudsClient # uses suds-py3
 
+import logging
+# Silence suds transport/client logs specifically
+logging.getLogger('suds.client').setLevel(logging.CRITICAL)
+logging.getLogger('suds.transport').setLevel(logging.CRITICAL)
+
 from pipeline_eds.api.eds.rest.client import ClientEdsRest
 from pipeline_eds.security_and_config import SecurityAndConfig, get_base_url_config_with_prompt
 from pipeline_eds.variable_clarity import Redundancy
 from pipeline_eds.api.eds.config import get_configurable_default_plant_name, get_configurable_idcs_list
+
 
 class ClientEdsSoap:
     def __init__(self):
