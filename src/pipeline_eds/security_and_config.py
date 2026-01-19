@@ -65,7 +65,7 @@ class SecurityAndConfig:
         whichever_is_true = next((
             name for name, flag in [
                 ("webbrowser", force_terminal and force_webbrowser or force_tkinter and force_webbrowser), # favor webbrowser in these multi-force scenarios
-                ("terminal", force_tkinter and force_terminal), # favor tkinter in this multi-force scenario
+                ("terminal", force_tkinter and force_terminal), # favor terminal in this multi-force scenario
                 ("webbrowser", force_webbrowser),
                 ("terminal", force_terminal),
                 ("tkinter", force_tkinter)
