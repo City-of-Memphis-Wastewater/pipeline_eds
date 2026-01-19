@@ -8,7 +8,11 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [0.4.21] – 2026-01-19
 ### Fixed:
-- Add AvoidPrompt enum class to compliment the ForcePrompt class
+- Add AvoidPrompt enum class to compliment the ForcePrompt class.
+
+### Changed:
+- in dworshak-access usage, store single secret values for wach item and servjce value, rather than pairs of username and password. bump to 0.1.18 for dworshak-access. 
+- keyring is out.
 
 ---
 
