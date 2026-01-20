@@ -12,6 +12,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ### Fixed:
 - Improve keyboard interrupt by raising instead of returning 
+
 ---
 
 ## [0.4.23] – 2026-01-19
